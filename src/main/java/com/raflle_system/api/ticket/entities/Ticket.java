@@ -1,6 +1,7 @@
 package com.raflle_system.api.ticket.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.raflle_system.api.purchase.entities.Purchase;
 import com.raflle_system.api.raffle.entities.Raffle;
 import com.raflle_system.api.ticket.enums.TicketStatus;
 import jakarta.persistence.*;
@@ -30,6 +31,10 @@ public class Ticket {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "raffle_id", nullable = false)
     private Raffle raffle;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "purchase_id")
+    private Purchase purchase;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
     private Instant createdAt = Instant.now();
@@ -73,5 +78,13 @@ public class Ticket {
 
     public void setRaffle(Raffle raffle) {
         this.raffle = raffle;
+    }
+
+    public Purchase getPurchase() {
+        return purchase;
+    }
+
+    public void setPurchase(Purchase purchase) {
+        this.purchase = purchase;
     }
 }
