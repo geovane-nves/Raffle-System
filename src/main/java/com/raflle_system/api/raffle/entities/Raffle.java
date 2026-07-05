@@ -1,6 +1,7 @@
 package com.raflle_system.api.raffle.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.raflle_system.api.purchase.entities.Purchase;
 import com.raflle_system.api.raffle.enums.RaffleStatus;
 import com.raflle_system.api.ticket.entities.Ticket;
 import com.raflle_system.api.user.entities.User;
@@ -59,6 +60,9 @@ public class Raffle {
 
     @OneToMany(mappedBy = "raffle", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ticket> tickets = new ArrayList<>();
+
+    @OneToMany(mappedBy = "raffle")
+    private List<Purchase> purchases = new ArrayList<>();
 
     public Raffle() {
     }

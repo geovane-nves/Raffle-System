@@ -1,6 +1,7 @@
 package com.raflle_system.api.user.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.raflle_system.api.purchase.entities.Purchase;
 import com.raflle_system.api.raffle.entities.Raffle;
 import com.raflle_system.api.user.role.UserRole;
 import jakarta.persistence.*;
@@ -45,6 +46,9 @@ public class User{
 
     @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Raffle> raffles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<Purchase> purchases = new ArrayList<>();
 
     public User(){
     }
