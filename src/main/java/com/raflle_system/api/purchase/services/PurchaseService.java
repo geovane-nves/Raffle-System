@@ -1,8 +1,11 @@
 package com.raflle_system.api.purchase.services;
 
+import com.raflle_system.api.payment.entities.Payment;
+import com.raflle_system.api.payment.repositories.PaymentRepository;
 import com.raflle_system.api.purchase.dtos.PurchaseRequestDTO;
 import com.raflle_system.api.purchase.dtos.PurchaseResponseDTO;
 import com.raflle_system.api.purchase.entities.Purchase;
+import com.raflle_system.api.purchase.enums.PurchaseStatus;
 import com.raflle_system.api.purchase.repositories.PurchaseRepository;
 import com.raflle_system.api.raffle.entities.Raffle;
 import com.raflle_system.api.raffle.repositories.RaffleRepository;
@@ -31,6 +34,9 @@ public class PurchaseService {
 
     @Autowired
     private TicketRepository ticketRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
 
     @Transactional
     public PurchaseResponseDTO create(PurchaseRequestDTO dto) {
@@ -62,6 +68,7 @@ public class PurchaseService {
 
         purchase.setUser(user);
         purchase.setRaffle(raffle);
+        purchase.setStatus(PurchaseStatus.WAITING_PAYMENT);
 
         BigDecimal total = raffle.getTicketPrice()
                 .multiply(BigDecimal.valueOf(tickets.size()));
@@ -74,6 +81,14 @@ public class PurchaseService {
         }
 
         Purchase savedPurchase = purchaseRepository.save(purchase);
+
+        Payment payment = new Payment();
+        payment.setPurchase(savedPurchase);
+        payment.setAmount(savedPurchase.getTotalAmount());
+
+        paymentRepository.save(payment);
+
+        savedPurchase.setPayment(payment);
 
         return PurchaseResponseDTO.fromEntity(savedPurchase);
     }

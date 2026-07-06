@@ -1,6 +1,7 @@
 package com.raflle_system.api.purchase.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.raflle_system.api.payment.entities.Payment;
 import com.raflle_system.api.purchase.enums.PurchaseStatus;
 import com.raflle_system.api.raffle.entities.Raffle;
 import com.raflle_system.api.ticket.entities.Ticket;
@@ -34,8 +35,8 @@ public class Purchase {
     @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
     private List<Ticket> tickets = new ArrayList<>();
 
-    // @OneToOne(mappedBy = "purchase", cascade = CascadeType.ALL)
-    // private Payment payment;
+    @OneToOne(mappedBy = "purchase", cascade = CascadeType.ALL)
+    private Payment payment;
 
     @Column(nullable = false)
     private BigDecimal totalAmount;
@@ -52,7 +53,7 @@ public class Purchase {
 
     public Purchase() {
         this.createdAt = LocalDateTime.now();
-        this.status = PurchaseStatus.PENDING;
+        this.status = PurchaseStatus.WAITING_PAYMENT;
     }
 
     public UUID getId() {
@@ -110,6 +111,14 @@ public class Purchase {
 
     public void setTickets(List<Ticket> tickets) {
         this.tickets = tickets;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
     }
 
     public void addTicket(Ticket ticket) {
