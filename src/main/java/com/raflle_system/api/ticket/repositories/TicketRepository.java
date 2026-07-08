@@ -1,6 +1,7 @@
 package com.raflle_system.api.ticket.repositories;
 
 import com.raflle_system.api.ticket.entities.Ticket;
+import com.raflle_system.api.ticket.enums.TicketStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,4 +26,5 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     """)
     List<Ticket> findAvailableTickets(UUID raffleId, Pageable pageable);
 
+    List<Ticket> findByRaffleIdAndStatus(UUID raffleId, TicketStatus status);
 }

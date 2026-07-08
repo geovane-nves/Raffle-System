@@ -5,6 +5,7 @@ public enum RaffleStatus {
     OPEN("open"),
     CLOSED("closed"),
     FINISHED("finished"),
+    DRAWN("drawn"),
     CANCELLED("cancelled");
 
     private String raffleStatus;

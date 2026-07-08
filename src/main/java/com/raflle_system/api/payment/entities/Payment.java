@@ -2,6 +2,7 @@ package com.raflle_system.api.payment.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.raflle_system.api.payment.enums.PaymentStatus;
+import com.raflle_system.api.paymentTransaction.entities.PaymentTransaction;
 import com.raflle_system.api.purchase.entities.Purchase;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -22,6 +23,9 @@ public class Payment {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "purchase_id", nullable = false, unique = true)
     private Purchase purchase;
+
+    @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL)
+    private PaymentTransaction paymentTransaction;
 
     @Column(nullable = false)
     private BigDecimal amount;
@@ -101,5 +105,13 @@ public class Payment {
 
     public void setPaidAt(LocalDateTime paidAt) {
         this.paidAt = paidAt;
+    }
+
+    public PaymentTransaction getPaymentTransaction() {
+        return paymentTransaction;
+    }
+
+    public void setPaymentTransaction(PaymentTransaction paymentTransaction) {
+        this.paymentTransaction = paymentTransaction;
     }
 }
