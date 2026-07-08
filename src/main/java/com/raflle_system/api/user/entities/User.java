@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.raflle_system.api.purchase.entities.Purchase;
 import com.raflle_system.api.raffle.entities.Raffle;
 import com.raflle_system.api.user.role.UserRole;
+import com.raflle_system.api.wallet.entities.Wallet;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -49,6 +50,9 @@ public class User{
 
     @OneToMany(mappedBy = "user")
     private List<Purchase> purchases = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Wallet wallet;
 
     public User(){
     }
@@ -103,5 +107,13 @@ public class User{
 
     public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    public Wallet getWallet() {
+        return wallet;
+    }
+
+    public void setWallet(Wallet wallet) {
+        this.wallet = wallet;
     }
 }
