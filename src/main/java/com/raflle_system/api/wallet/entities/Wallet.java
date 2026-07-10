@@ -1,10 +1,14 @@
 package com.raflle_system.api.wallet.entities;
 
 import com.raflle_system.api.user.entities.User;
+import com.raflle_system.api.walletTransaction.entities.WalletTransaction;
+import com.raflle_system.api.withdrawal.entities.Withdrawal;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -19,6 +23,12 @@ public class Wallet {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
+
+    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL)
+    private List<WalletTransaction> transactions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL)
+    private List<Withdrawal> withdrawals = new ArrayList<>();
 
     @Column(nullable = false)
     private BigDecimal availableBalance = BigDecimal.ZERO;
@@ -47,6 +57,22 @@ public class Wallet {
 
     public BigDecimal getLockedBalance() {
         return lockedBalance;
+    }
+
+    public List<WalletTransaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(List<WalletTransaction> transactions) {
+        this.transactions = transactions;
+    }
+
+    public List<Withdrawal> getWithdrawals() {
+        return withdrawals;
+    }
+
+    public void setWithdrawals(List<Withdrawal> withdrawals) {
+        this.withdrawals = withdrawals;
     }
 
     public void credit(BigDecimal amount) {
@@ -80,5 +106,15 @@ public class Wallet {
         }
 
         availableBalance = availableBalance.subtract(amount);
+    }
+
+    public void addTransaction(WalletTransaction transaction) {
+        this.transactions.add(transaction);
+        transaction.setWallet(this);
+    }
+
+    public void addWithdrawal(Withdrawal withdrawal){
+        withdrawals.add(withdrawal);
+        withdrawal.setWallet(this);
     }
 }

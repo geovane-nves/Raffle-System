@@ -12,6 +12,11 @@ import com.raflle_system.api.purchase.repositories.PurchaseRepository;
 import com.raflle_system.api.ticket.entities.Ticket;
 import com.raflle_system.api.ticket.enums.TicketStatus;
 import com.raflle_system.api.ticket.repositories.TicketRepository;
+import com.raflle_system.api.wallet.entities.Wallet;
+import com.raflle_system.api.wallet.repositories.WalletRepository;
+import com.raflle_system.api.walletTransaction.entities.WalletTransaction;
+import com.raflle_system.api.walletTransaction.enums.TransactionType;
+import com.raflle_system.api.walletTransaction.repositories.WalletTransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +37,12 @@ public class PaymentService {
 
     @Autowired
     private PaymentTransactionRepository paymentTransactionRepository;
+
+    @Autowired
+    private WalletRepository walletRepository;
+
+    @Autowired
+    private WalletTransactionRepository walletTransactionRepository;
 
     public PaymentResponseDTO findByPurchase(UUID purchaseId){
 
@@ -75,6 +86,25 @@ public class PaymentService {
         for(Ticket ticket : purchase.getTickets()){
             ticket.setStatus(TicketStatus.PAID);
         }
+
+        Wallet wallet = walletRepository
+                .findByUserId(purchase.getRaffle().getCreator().getId())
+                .orElseThrow(() -> new RuntimeException("Wallet not found."));
+
+        wallet.credit(payment.getAmount());
+
+        WalletTransaction walletTransaction = new WalletTransaction();
+
+        walletTransaction.setAmount(payment.getAmount());
+        walletTransaction.setType(TransactionType.RELEASED);
+        walletTransaction.setDescription(
+                "Payment from raffle: " + purchase.getRaffle().getTitle()
+        );
+
+        wallet.addTransaction(walletTransaction);
+
+        walletRepository.save(wallet);
+        walletTransactionRepository.save(walletTransaction);
 
         purchaseRepository.save(purchase);
         ticketRepository.saveAll(purchase.getTickets());
