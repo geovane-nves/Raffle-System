@@ -1,5 +1,6 @@
 package com.raflle_system.api.withdrawal.services;
 
+import com.raflle_system.api.exceptions.NotFoundException;
 import com.raflle_system.api.user.entities.User;
 import com.raflle_system.api.wallet.entities.Wallet;
 import com.raflle_system.api.wallet.repositories.WalletRepository;
@@ -34,13 +35,12 @@ public class WithdrawalService {
 
     public WithdrawalResponseDTO request(WithdrawalRequestDTO dto){
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         User user = (User) authentication.getPrincipal();
 
         Wallet wallet = walletRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Wallet not found."));
+                .orElseThrow(() -> new NotFoundException("Wallet not found."));
 
         Withdrawal withdrawal = new Withdrawal();
 
@@ -52,17 +52,13 @@ public class WithdrawalService {
         withdrawalRepository.save(withdrawal);
 
         return WithdrawalResponseDTO.fromEntity(withdrawal);
-
     }
 
     public WithdrawalResponseDTO approve(UUID id){
-
         Withdrawal withdrawal = withdrawalRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Withdrawal not found."));
 
-        if(withdrawal.getStatus() != WithdrawalStatus.PENDING){
-            throw new RuntimeException("Withdrawal already processed.");
-        }
+        if(withdrawal.getStatus() != WithdrawalStatus.PENDING){ throw new RuntimeException("Withdrawal already processed."); }
 
         Wallet wallet = withdrawal.getWallet();
 
@@ -84,13 +80,12 @@ public class WithdrawalService {
         withdrawalRepository.save(withdrawal);
 
         return WithdrawalResponseDTO.fromEntity(withdrawal);
-
     }
 
     public WithdrawalResponseDTO reject(UUID id){
 
         Withdrawal withdrawal = withdrawalRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Withdrawal not found."));
+                .orElseThrow(() -> new NotFoundException("Withdrawal not found."));
 
         withdrawal.setStatus(WithdrawalStatus.REJECTED);
         withdrawal.setProcessedAt(LocalDateTime.now());
@@ -98,29 +93,23 @@ public class WithdrawalService {
         withdrawalRepository.save(withdrawal);
 
         return WithdrawalResponseDTO.fromEntity(withdrawal);
-
     }
 
     public WithdrawalResponseDTO findById(UUID id){
-
         return WithdrawalResponseDTO.fromEntity(
                 withdrawalRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Withdrawal not found."))
+                        .orElseThrow(() -> new NotFoundException("Withdrawal not found."))
         );
-
     }
 
     public List<WithdrawalResponseDTO> findAll(){
-
         return withdrawalRepository.findAll()
                 .stream()
                 .map(WithdrawalResponseDTO::fromEntity)
                 .toList();
-
     }
 
     public List<WithdrawalResponseDTO> findByWallet(UUID walletId){
-
         return withdrawalRepository.findByWalletId(walletId)
                 .stream()
                 .map(WithdrawalResponseDTO::fromEntity)

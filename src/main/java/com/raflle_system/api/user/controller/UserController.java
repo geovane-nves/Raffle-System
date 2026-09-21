@@ -1,5 +1,6 @@
 package com.raflle_system.api.user.controller;
 
+import com.raflle_system.api.user.dtos.UserResponseDTO;
 import com.raflle_system.api.user.dtos.UserUpdateDTO;
 import com.raflle_system.api.user.entities.User;
 import com.raflle_system.api.user.services.UserService;
@@ -18,7 +19,7 @@ public class UserController {
     private UserService service;
 
     @PutMapping("/me")
-    public User update(@RequestBody UserUpdateDTO dto, Authentication authentication) {
+    public UserResponseDTO update(@RequestBody UserUpdateDTO dto, Authentication authentication) {
         User loggedUser = (User) authentication.getPrincipal();
         return service.update(loggedUser.getId(), dto);
     }

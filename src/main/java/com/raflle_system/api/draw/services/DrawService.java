@@ -4,6 +4,8 @@ import com.raflle_system.api.draw.dtos.DrawResponseDTO;
 import com.raflle_system.api.draw.entities.Draw;
 import com.raflle_system.api.draw.enums.DrawStatus;
 import com.raflle_system.api.draw.repositories.DrawRepository;
+import com.raflle_system.api.exceptions.ConflictException;
+import com.raflle_system.api.exceptions.NotFoundException;
 import com.raflle_system.api.raffle.entities.Raffle;
 import com.raflle_system.api.raffle.enums.RaffleStatus;
 import com.raflle_system.api.raffle.repositories.RaffleRepository;
@@ -36,21 +38,15 @@ public class DrawService {
     public DrawResponseDTO execute(UUID raffleId){
 
         Raffle raffle = raffleRepository.findById(raffleId)
-                .orElseThrow(() -> new RuntimeException("Raffle not found."));
+                .orElseThrow(() -> new NotFoundException("Raffle not found."));
 
-        if(raffle.getStatus() != RaffleStatus.FINISHED){
-            throw new RuntimeException("Raffle is not finished.");
-        }
+        if(raffle.getStatus() != RaffleStatus.FINISHED){throw new ConflictException("Raffle is not finished.");}
 
-        if(drawRepository.findByRaffleId(raffleId).isPresent()){
-            throw new RuntimeException("Draw already executed.");
-        }
+        if(drawRepository.findByRaffleId(raffleId).isPresent()){throw new ConflictException("Draw already executed.");}
 
         List<Ticket> paidTickets = ticketRepository.findByRaffleIdAndStatus(raffleId, TicketStatus.PAID);
 
-        if(paidTickets.isEmpty()){
-            throw new RuntimeException("No paid tickets.");
-        }
+        if(paidTickets.isEmpty()){throw new ConflictException("No paid tickets.");}
 
         Draw draw = new Draw();
 
@@ -70,13 +66,12 @@ public class DrawService {
         Draw saved = drawRepository.save(draw);
 
         return DrawResponseDTO.fromEntity(saved);
-
     }
 
     public DrawResponseDTO findById(UUID id){
 
         return DrawResponseDTO.fromEntity(
-                drawRepository.findById(id).orElseThrow(() -> new RuntimeException("Draw not found."))
+                drawRepository.findById(id).orElseThrow(() -> new NotFoundException("Draw not found."))
         );
 
     }

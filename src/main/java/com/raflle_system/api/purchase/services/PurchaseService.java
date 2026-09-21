@@ -1,5 +1,7 @@
 package com.raflle_system.api.purchase.services;
 
+import com.raflle_system.api.exceptions.ConflictException;
+import com.raflle_system.api.exceptions.NotFoundException;
 import com.raflle_system.api.payment.entities.Payment;
 import com.raflle_system.api.payment.repositories.PaymentRepository;
 import com.raflle_system.api.purchase.dtos.PurchaseRequestDTO;
@@ -45,23 +47,15 @@ public class PurchaseService {
         User user = (User) authentication.getPrincipal();
 
         Raffle raffle = raffleRepository.findById(dto.raffleId())
-                .orElseThrow(() -> new RuntimeException("Raffle not found."));
+                .orElseThrow(() -> new NotFoundException("Raffle not found."));
 
         List<Ticket> tickets = ticketRepository.findAllById(dto.ticketIds());
 
-        if (tickets.size() != dto.ticketIds().size()) {
-            throw new RuntimeException("One or more tickets were not found.");
-        }
+        if (tickets.size() != dto.ticketIds().size()) { throw new NotFoundException("One or more tickets were not found."); }
 
         for (Ticket ticket : tickets) {
-
-            if (!ticket.getRaffle().getId().equals(raffle.getId())) {
-                throw new RuntimeException("Ticket does not belong to this raffle.");
-            }
-
-            if (ticket.getStatus() != TicketStatus.AVAILABLE) {
-                throw new RuntimeException("Ticket " + ticket.getNumber() + " is unavailable.");
-            }
+            if (!ticket.getRaffle().getId().equals(raffle.getId())) { throw new ConflictException("Ticket does not belong to this raffle."); }
+            if (ticket.getStatus() != TicketStatus.AVAILABLE) { throw new ConflictException("Ticket " + ticket.getNumber() + " is unavailable."); }
         }
 
         Purchase purchase = new Purchase();
@@ -70,8 +64,7 @@ public class PurchaseService {
         purchase.setRaffle(raffle);
         purchase.setStatus(PurchaseStatus.WAITING_PAYMENT);
 
-        BigDecimal total = raffle.getTicketPrice()
-                .multiply(BigDecimal.valueOf(tickets.size()));
+        BigDecimal total = raffle.getTicketPrice().multiply(BigDecimal.valueOf(tickets.size()));
 
         purchase.setTotalAmount(total);
 
@@ -96,7 +89,7 @@ public class PurchaseService {
     public PurchaseResponseDTO findById(UUID id) {
 
         Purchase purchase = purchaseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Purchase not found."));
+                .orElseThrow(() -> new NotFoundException("Purchase not found."));
 
         return PurchaseResponseDTO.fromEntity(purchase);
     }
@@ -112,7 +105,7 @@ public class PurchaseService {
     public void delete(UUID id) {
 
         Purchase purchase = purchaseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Purchase not found."));
+                .orElseThrow(() -> new NotFoundException("Purchase not found."));
 
         purchaseRepository.delete(purchase);
     }

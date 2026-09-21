@@ -1,5 +1,7 @@
 package com.raflle_system.api.payment.services;
 
+import com.raflle_system.api.exceptions.ConflictException;
+import com.raflle_system.api.exceptions.NotFoundException;
 import com.raflle_system.api.payment.dtos.PaymentResponseDTO;
 import com.raflle_system.api.payment.entities.Payment;
 import com.raflle_system.api.payment.enums.PaymentStatus;
@@ -45,28 +47,22 @@ public class PaymentService {
     private WalletTransactionRepository walletTransactionRepository;
 
     public PaymentResponseDTO findByPurchase(UUID purchaseId){
-
         Payment payment = paymentRepository.findByPurchaseId(purchaseId)
-                .orElseThrow(() -> new RuntimeException("Payment not found."));
+                .orElseThrow(() -> new NotFoundException("Payment not found."));
 
         return PaymentResponseDTO.fromEntity(payment);
     }
 
     public PaymentResponseDTO confirm(UUID paymentId){
-
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new RuntimeException("Payment not found."));
+                .orElseThrow(() -> new NotFoundException("Payment not found."));
 
-        if (payment.getStatus() == PaymentStatus.PAID) {
-            throw new RuntimeException("Payment has already been confirmed.");
-        }
+        if (payment.getStatus() == PaymentStatus.PAID) { throw new ConflictException("Payment has already been confirmed."); }
 
         payment.setStatus(PaymentStatus.PAID);
         payment.setPaidAt(LocalDateTime.now());
 
-        if (paymentTransactionRepository.findByPaymentId(payment.getId()).isPresent()) {
-            throw new RuntimeException("Payment transaction already exists.");
-        }
+        if (paymentTransactionRepository.findByPaymentId(payment.getId()).isPresent()) { throw new RuntimeException("Payment transaction already exists."); }
 
         PaymentTransaction transaction = new PaymentTransaction();
 
@@ -83,13 +79,11 @@ public class PaymentService {
 
         purchase.setStatus(PurchaseStatus.PAID);
 
-        for(Ticket ticket : purchase.getTickets()){
-            ticket.setStatus(TicketStatus.PAID);
-        }
+        for(Ticket ticket : purchase.getTickets()){ ticket.setStatus(TicketStatus.PAID); }
 
         Wallet wallet = walletRepository
                 .findByUserId(purchase.getRaffle().getCreator().getId())
-                .orElseThrow(() -> new RuntimeException("Wallet not found."));
+                .orElseThrow(() -> new NotFoundException("Wallet not found."));
 
         wallet.credit(payment.getAmount());
 
@@ -97,9 +91,7 @@ public class PaymentService {
 
         walletTransaction.setAmount(payment.getAmount());
         walletTransaction.setType(TransactionType.RELEASED);
-        walletTransaction.setDescription(
-                "Payment from raffle: " + purchase.getRaffle().getTitle()
-        );
+        walletTransaction.setDescription("Payment from raffle: " + purchase.getRaffle().getTitle());
 
         wallet.addTransaction(walletTransaction);
 
@@ -112,7 +104,5 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         return PaymentResponseDTO.fromEntity(payment);
-
     }
-
 }

@@ -1,5 +1,6 @@
 package com.raflle_system.api.paymentTransaction.services;
 
+import com.raflle_system.api.exceptions.NotFoundException;
 import com.raflle_system.api.paymentTransaction.dtos.PaymentTransactionResponseDTO;
 import com.raflle_system.api.paymentTransaction.entities.PaymentTransaction;
 import com.raflle_system.api.paymentTransaction.repositories.PaymentTransactionRepository;
@@ -18,9 +19,8 @@ public class PaymentTransactionService {
 
         PaymentTransaction transaction = paymentTransactionRepository
                 .findByPaymentId(paymentId)
-                .orElseThrow(() -> new RuntimeException("Payment transaction not found."));
+                .orElseThrow(() -> new NotFoundException("Payment transaction not found."));
 
         return PaymentTransactionResponseDTO.fromEntity(transaction);
-
     }
 }
