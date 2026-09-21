@@ -2,6 +2,10 @@ package com.raflle_system.api.user.services;
 
 import com.raflle_system.api.auth.dtos.RegisterDTO;
 import com.raflle_system.api.auth.dtos.RegisterResponseDTO;
+import com.raflle_system.api.exceptions.BadRequestException;
+import com.raflle_system.api.exceptions.NotFoundException;
+import com.raflle_system.api.exceptions.UnauthorizedException;
+import com.raflle_system.api.user.dtos.UserResponseDTO;
 import com.raflle_system.api.user.dtos.UserUpdateDTO;
 import com.raflle_system.api.user.entities.User;
 import com.raflle_system.api.user.repositories.UserRepository;
@@ -9,11 +13,9 @@ import com.raflle_system.api.wallet.entities.Wallet;
 import com.raflle_system.api.wallet.repositories.WalletRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -30,50 +32,57 @@ public class UserService {
     private WalletRepository walletRepository;
 
     public RegisterResponseDTO register(RegisterDTO dto) {
-        if (repository.findByEmail(dto.email()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
-        }
+
+        if (repository.findByEmail(dto.email()).isPresent()) { throw new BadRequestException("Email already exists."); }
+
         try {
             String encodedPassword = passwordEncoder.encode(dto.password());
             User user = dto.toEntity(encodedPassword);
+
             User savedUser = repository.save(user);
 
             Wallet wallet = new Wallet();
             wallet.setUser(savedUser);
+
             walletRepository.save(wallet);
 
             return RegisterResponseDTO.fromEntity(savedUser);
 
-        } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
-        }
+        } catch (DataIntegrityViolationException e) { throw new BadRequestException("Email already exists."); }
     }
 
     public User findByEmail(String email) {
         return repository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found."));
     }
 
-    public User update(UUID id, UserUpdateDTO dto) {
+    public UserResponseDTO update(UUID id, UserUpdateDTO dto) {
         User user = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("User not found."));
+
         user.setName(dto.name());
-        return repository.save(user);
+        User updatedUser = repository.save(user);
+        return UserResponseDTO.fromEntity(updatedUser);
     }
 
     public void delete(UUID id) {
         User user = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("User not found."));
         repository.delete(user);
     }
 
     public User getAuthenticatedUser() {
-        Object principal = SecurityContextHolder.getContext()
+        Object principal = SecurityContextHolder
+                .getContext()
                 .getAuthentication()
                 .getPrincipal();
 
-        if (principal instanceof User user) {return user;}
-        throw new RuntimeException("User not authenticated");
+        if (principal instanceof User user) { return user; }
+        throw new UnauthorizedException("User not authenticated.");
     }
 
+    public UserResponseDTO me() {
+        User user = getAuthenticatedUser();
+        return UserResponseDTO.fromEntity(user);
+    }
 }

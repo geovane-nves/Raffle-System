@@ -1,5 +1,6 @@
 package com.raflle_system.api.raffle.services;
 
+import com.raflle_system.api.exceptions.NotFoundException;
 import com.raflle_system.api.raffle.dtos.RaffleRequestDTO;
 import com.raflle_system.api.raffle.dtos.RaffleResponseDTO;
 import com.raflle_system.api.raffle.entities.Raffle;
@@ -62,7 +63,7 @@ public class RaffleService {
 
     public RaffleResponseDTO findById(UUID id) {
         Raffle raffle = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Raffle not found"));
+                .orElseThrow(() -> new NotFoundException("Raffle not found"));
 
         return RaffleResponseDTO.fromEntity(raffle);
     }
@@ -70,7 +71,7 @@ public class RaffleService {
     public RaffleResponseDTO update(UUID id, RaffleRequestDTO dto) {
 
         Raffle raffle = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Raffle not found"));
+                .orElseThrow(() -> new NotFoundException("Raffle not found"));
 
         raffle.setTitle(dto.title());
         raffle.setDescription(dto.description());
@@ -86,7 +87,7 @@ public class RaffleService {
     public void delete(UUID id) {
 
         Raffle raffle = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Raffle not found"));
+                .orElseThrow(() -> new NotFoundException("Raffle not found"));
 
         repository.delete(raffle);
     }

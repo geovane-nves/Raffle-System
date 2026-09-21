@@ -38,6 +38,14 @@ public class User{
     @Column(nullable = false)
     private String password;
 
+    @NotBlank(message = "CPF is required")
+    @Column(nullable = false, unique = true, length = 14)
+    private String cpf;
+
+    @NotBlank(message = "Number phone is required")
+    @Column(nullable = false)
+    private String phone;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
     private Instant createdAt = Instant.now();
 
@@ -61,10 +69,12 @@ public class User{
         this.role = UserRole.USER;
     }
 
-    public User(String name, String email, String password) {
+    public User(String name, String email, String password, String cpf, String phone) {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.cpf = cpf;
+        this.phone = phone;
         this.role = UserRole.USER;
         this.createdAt = Instant.now();
     }
@@ -95,6 +105,22 @@ public class User{
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
     }
 
     public Instant getCreatedAt() {

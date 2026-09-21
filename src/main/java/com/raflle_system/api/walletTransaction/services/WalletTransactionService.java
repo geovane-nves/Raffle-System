@@ -1,5 +1,6 @@
 package com.raflle_system.api.walletTransaction.services;
 
+import com.raflle_system.api.exceptions.NotFoundException;
 import com.raflle_system.api.walletTransaction.dtos.WalletTransactionResponseDTO;
 import com.raflle_system.api.walletTransaction.entities.WalletTransaction;
 import com.raflle_system.api.walletTransaction.repositories.WalletTransactionRepository;
@@ -18,7 +19,7 @@ public class WalletTransactionService {
     public WalletTransactionResponseDTO findById(UUID id) {
 
         WalletTransaction transaction = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transaction not found."));
+                .orElseThrow(() -> new NotFoundException("Transaction not found."));
 
         return WalletTransactionResponseDTO.fromEntity(transaction);
     }

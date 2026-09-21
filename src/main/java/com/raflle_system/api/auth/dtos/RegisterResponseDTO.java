@@ -11,6 +11,8 @@ public record RegisterResponseDTO(
         UUID id,
         String name,
         String email,
+        String cpf,
+        String phone,
         UserRole role,
         Instant createdAt
 ) {
@@ -19,6 +21,8 @@ public record RegisterResponseDTO(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.getCpf(),
+                user.getPhone(),
                 user.getRole(),
                 user.getCreatedAt()
         );

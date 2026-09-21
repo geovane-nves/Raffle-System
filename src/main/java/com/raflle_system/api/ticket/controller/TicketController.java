@@ -30,6 +30,13 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.findAll());
     }
 
+    @GetMapping("/raffle/{raffleId}")
+    public ResponseEntity<List<TicketResponseDTO>> findByRaffle(
+            @PathVariable UUID raffleId) {
+
+        return ResponseEntity.ok(ticketService.findByRaffle(raffleId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponseDTO> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ticketService.findById(id));

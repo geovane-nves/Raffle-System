@@ -1,5 +1,6 @@
 package com.raflle_system.api.wallet.services;
 
+import com.raflle_system.api.exceptions.NotFoundException;
 import com.raflle_system.api.user.entities.User;
 import com.raflle_system.api.wallet.dtos.WalletResponseDTO;
 import com.raflle_system.api.wallet.entities.Wallet;
@@ -19,20 +20,19 @@ public class WalletService {
     private WalletRepository walletRepository;
 
     public WalletResponseDTO findMyWallet() {
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         User user = (User) authentication.getPrincipal();
 
         Wallet wallet = walletRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Wallet not found."));
+                .orElseThrow(() -> new NotFoundException("Wallet not found."));
 
         return WalletResponseDTO.fromEntity(wallet);
     }
 
     public WalletResponseDTO findById(UUID id) {
         Wallet wallet = walletRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Wallet not found."));
+                .orElseThrow(() -> new NotFoundException("Wallet not found."));
 
         return WalletResponseDTO.fromEntity(wallet);
     }
@@ -46,7 +46,7 @@ public class WalletService {
 
     public void delete(UUID id) {
         Wallet wallet = walletRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Wallet not found."));
+                .orElseThrow(() -> new NotFoundException("Wallet not found."));
 
         walletRepository.delete(wallet);
     }

@@ -27,4 +27,6 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     List<Ticket> findAvailableTickets(UUID raffleId, Pageable pageable);
 
     List<Ticket> findByRaffleIdAndStatus(UUID raffleId, TicketStatus status);
+
+    List<Ticket> findByRaffleIdOrderByNumber(UUID raffleId);
 }
