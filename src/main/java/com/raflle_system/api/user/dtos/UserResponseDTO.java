@@ -11,6 +11,8 @@ public record UserResponseDTO(
         UUID id,
         String name,
         String email,
+        String cpf,
+        String phone,
         Instant createdAt,
         UserRole role
 
@@ -21,6 +23,8 @@ public record UserResponseDTO(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.getCpf(),
+                user.getPhone(),
                 user.getCreatedAt(),
                 user.getRole()
         );

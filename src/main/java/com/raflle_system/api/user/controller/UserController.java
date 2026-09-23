@@ -24,6 +24,11 @@ public class UserController {
         return service.update(loggedUser.getId(), dto);
     }
 
+    @GetMapping("/me")
+    public UserResponseDTO me() {
+        return service.me();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@PathVariable UUID id) {
         service.delete(id);
