@@ -61,6 +61,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
         user.setName(dto.name());
+        user.setPhone(dto.phone());
         User updatedUser = repository.save(user);
         return UserResponseDTO.fromEntity(updatedUser);
     }
